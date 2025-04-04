@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-
+    console.log('Cron job triggered at:', new Date().toISOString());
     // URL of the sitemap.xml file
   const sitemapUrl = 'https://ziploc.com/sitemap.xml'; // Replace with your actual URL
 
@@ -17,6 +17,7 @@ export async function GET() {
   };
 
   try {
+    console.log('Cron job try block: ', new Date().toISOString());
     // Step 1: Fetch the sitemap.xml file from the URL
     const response = await axios.get(sitemapUrl);
     const sitemapXml = response.data;
@@ -31,7 +32,7 @@ export async function GET() {
 
     // Close the SFTP connection
     await sftp.end();
-
+    console.log('Cron job sftp end at:', new Date().toISOString());
     // Return a success response
     res.status(200).json({ message: 'Sitemap uploaded successfully' });
   } catch (error) {
