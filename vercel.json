@@ -1,9 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/uploadSitemap",
-      "schedule": "5 * * * *",
-      "method": "POST"
-    }
-  ]
-}
