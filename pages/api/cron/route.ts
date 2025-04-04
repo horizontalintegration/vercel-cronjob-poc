@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import axios from 'axios';
+import SFTPClient from 'ssh2-sftp-client';
 
 export async function GET() {
     console.log('Cron job triggered at:', new Date().toISOString());
@@ -8,7 +10,7 @@ export async function GET() {
   // SFTP configuration
   const sftpConfig = {
     host: process.env.SFTP_HOST,
-    port: process.env.SFTP_PORT || 22,  // Default SFTP port is 22
+    port:  22,  // Default SFTP port is 22
     username: process.env.SFTP_USERNAME,
     password: process.env.SFTP_PASSWORD,
     // Optional: use privateKey and passphrase for authentication if needed
@@ -34,10 +36,10 @@ export async function GET() {
     await sftp.end();
     console.log('Cron job sftp end at:', new Date().toISOString());
     // Return a success response
-    res.status(200).json({ message: 'Sitemap uploaded successfully' });
+    //res.status(200).json({ message: 'Sitemap uploaded successfully' });
   } catch (error) {
     console.error('Error uploading sitemap:', error);
-    res.status(500).json({ message: 'Failed to upload sitemap', error: error.message });
+    //res.status(500).json({ message: 'Failed to upload sitemap', error: error.message });
   }
   return NextResponse.json({ ok: true });
 }
