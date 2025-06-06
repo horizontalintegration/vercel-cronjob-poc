@@ -1,45 +1,43 @@
-import { NextResponse } from 'next/server';
-import axios from 'axios';
-import SFTPClient from 'ssh2-sftp-client';
+import { BlobServiceClient } from "@azure/storage-blob";
+import { NextResponse } from "next/server";
+import axios from "axios";
+
+export const runtime = "nodejs"; // Only needed in app router
 
 export async function GET() {
-    console.log('Cron job triggered at:', new Date().toISOString());
-    // URL of the sitemap.xml file
-  const sitemapUrl = 'https://ziploc.com/sitemap.xml'; // Replace with your actual URL
-
-  // SFTP configuration
-  const sftpConfig = {
-    host: process.env.SFTP_HOST,
-    port:  22,  // Default SFTP port is 22
-    username: process.env.SFTP_USERNAME,
-    password: process.env.SFTP_PASSWORD,
-    // Optional: use privateKey and passphrase for authentication if needed
-    // privateKey: require('fs').readFileSync('/path/to/private/key'),
-    // passphrase: process.env.SFTP_PASSPHRASE,
-  };
+  const sitemapUrl = "https://ziploc.com/sitemap.xml";
 
   try {
-    console.log('Cron job try block: ', new Date().toISOString());
-    // Step 1: Fetch the sitemap.xml file from the URL
+    // Step 1: Download the sitemap XML
     const response = await axios.get(sitemapUrl);
     const sitemapXml = response.data;
 
-    // Step 2: Connect to the SFTP server
-    const sftp = new SFTPClient();
-    await sftp.connect(sftpConfig);
+    // Step 2: Connect to Azure Blob Storage
+    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+    const containerName = process.env.AZURE_CONTAINER_NAME;
 
-    // Step 3: Upload the sitemap.xml to the SFTP server
-    const remotePath = '/xml/sitemap1.xml'; // Specify the remote path on the SFTP server
-    await sftp.put(Buffer.from(sitemapXml), remotePath);
+    const blobServiceClient =
+      BlobServiceClient.fromConnectionString(connectionString);
+    const containerClient = blobServiceClient.getContainerClient(containerName);
 
-    // Close the SFTP connection
-    await sftp.end();
-    console.log('Cron job sftp end at:', new Date().toISOString());
-    // Return a success response
-    //res.status(200).json({ message: 'Sitemap uploaded successfully' });
+    // Ensure container exists
+    await containerClient.createIfNotExists({ access: "container" });
+
+    // Step 3: Upload the file
+    const blobName = `xml/sitemap-${Date.now()}.xml`;
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+    await blockBlobClient.upload(sitemapXml, Buffer.byteLength(sitemapXml), {
+      blobHTTPHeaders: { blobContentType: "application/xml" },
+    });
+
+    console.log(`Uploaded ${blobName} successfully.`);
+    return NextResponse.json({ ok: true, blobName });
   } catch (error) {
-    console.error('Error uploading sitemap:', error);
-    //res.status(500).json({ message: 'Failed to upload sitemap', error: error.message });
+    console.error("Upload error:", error.message);
+    return NextResponse.json(
+      { ok: false, error: error.message },
+      { status: 500 }
+    );
   }
-  return NextResponse.json({ ok: true });
 }
