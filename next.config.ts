@@ -1,20 +1,23 @@
-import { NextConfig as NextConfigType } from "next";
+import type { NextConfig } from "next";
 
-const nextConfig: NextConfigType = {
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Prevent bundling native modules on the client
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        child_process: false,
-        crypto: false,
-      };
-    }
-
-    return config;
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+module.exports = {
+  resolve: {
+    extensions: ["...", ".node"],
+  },
+  target: "node",
+  node: {
+    __dirname: false,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.node$/,
+        loader: "node-loader",
+      },
+    ],
   },
 };
 
