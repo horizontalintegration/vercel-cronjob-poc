@@ -5,6 +5,7 @@ import axios from "axios";
 export const runtime = "nodejs"; // Only needed in app router
 
 export async function GET() {
+  console.info("Cron job of Azure Started");
   const sitemapUrl = "https://ziploc.com/sitemap.xml";
 
   try {
