@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 import SFTPClient from 'ssh2-sftp-client';
