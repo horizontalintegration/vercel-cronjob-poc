@@ -12,7 +12,7 @@ export const config = {
 };
 
 export async function GET() {
-  console.log("Cron job triggered at:", new Date().toISOString());
+  console.log("Cron sftp job triggered at:", new Date().toISOString());
 
   const sitemapUrl = "https://ziploc.com/sitemap.xml";
 
@@ -42,7 +42,7 @@ export async function GET() {
               return reject(err);
             }
 
-            const remotePath = "/xml/sitemap1.xml";
+            const remotePath = `xml/sitemap101-${Date.now()}.xml`;;
             const writeStream = sftp.createWriteStream(remotePath);
 
             writeStream.on("close", () => {
